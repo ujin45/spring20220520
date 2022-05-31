@@ -112,6 +112,29 @@ public class MemberController {
 			return "redirect:/member/get";
 		}
 	}
+	
+	@PostMapping("modify")
+	public String modifyMember(MemberDto dto, String oldPassword, RedirectAttributes rttr) {
+		
+		boolean success = service.modifyMember(dto, oldPassword);
+		
+		if (success) {
+			rttr.addFlashAttribute("message","회원정보가 수정되었습니다.");
+		}else {
+			rttr.addFlashAttribute("message","회원정보가 수정되지 않았습니다.");
+		}
+		
+		rttr.addFlashAttribute("member", dto); //model object
+		rttr.addAttribute("id",dto.getId()); // query string
+		
+		return "redirect:/member/get";
+				
+	}
+	
+	@GetMapping("login")
+	public void loginPage() {
+		
+	}
 }
 
 
