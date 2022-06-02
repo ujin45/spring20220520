@@ -1,11 +1,13 @@
 package com.choong.spr.service;
 
-import java.time.LocalDateTime;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.choong.spr.domain.BoardDto;
 import com.choong.spr.mapper.BoardMapper;
@@ -25,6 +27,7 @@ public class BoardService {
 		return mapper.selectBoardAll(type, "%" + keyword + "%");
 	}
 
+	
 	@Transactional
 	public boolean insertBoard(BoardDto board, MultipartFile file) {
 //		board.setInserted(LocalDateTime.now());
@@ -53,7 +56,26 @@ public class BoardService {
 
 	@Transactional
 	public boolean deleteBoard(int id) {
-
+		// 파일 목록 읽기
+		String fileName = mapper.selectFileByBoardId(id);
+		
+		// 실제 파일 삭제
+		if(fileName != null && !fileName.isEmpty()) {
+			
+			String folder = "C:/imgtmp/board/"+ id  + "/"; 
+			String path = folder + fileName;
+			
+			File file = new File(path);
+			file.delete();
+			
+			File dir = new File(folder);
+			dir.delete();
+			
+		}
+		
+		// 파일 테이블 삭제
+		mapper.deleteFileByBoardId(id);
+		// 댓글 테이블 삭제
 		replyMapper.deleteByBoardId(id);
 		
 		return mapper.deleteBoard(id) == 1;

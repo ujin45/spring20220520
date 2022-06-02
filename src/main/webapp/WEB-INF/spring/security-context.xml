@@ -27,6 +27,7 @@
 		
 		<!-- 회원 read, update, delete -->
 		<security:intercept-url pattern="/member/list" access="hasRole('ADMIN')"/>
+		<security:intercept-url pattern="/member/initpw" access="hasRole('ADMIN')"/>
 		<security:intercept-url pattern="/member/get" access="isAuthenticated()"/>
 		<security:intercept-url pattern="/member/remove" access="isAuthenticated()"/>
 		<security:intercept-url pattern="/member/modify" access="isAuthenticated()"/>

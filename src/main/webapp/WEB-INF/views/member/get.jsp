@@ -168,7 +168,7 @@
 </script>
 </head>
 <body>
-	<my:navBar></my:navBar>
+	<my:navBar current="memberInfo"></my:navBar>
 	
 	<div>
 		<p>${message }</p>
@@ -203,8 +203,8 @@
 	 --%>
 	
 	<div>
-	<button id="modifySubmitButton1" data-bs-toggle="modal" data-bs-target="#modal2" disabled>수정</button>
-	<button data-bs-toggle="modal" data-bs-target="#modal1">삭제</button>
+		<button id="modifySubmitButton1" data-bs-toggle="modal" data-bs-target="#modal2" disabled>수정</button>
+		<button data-bs-toggle="modal" data-bs-target="#modal1">삭제</button>
 	</div>
 	
 	

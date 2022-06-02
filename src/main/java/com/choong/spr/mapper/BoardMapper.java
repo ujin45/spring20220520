@@ -22,5 +22,11 @@ public interface BoardMapper {
 
 	void deleteByMemberId(String memberId);
 
+	void insertFile(@Param("boardId")int boardId,@Param("FileName") String FileName);
+
+	String selectFileByBoardId(int id);
+
+	void deleteFileByBoardId(int id);
+
 
 }

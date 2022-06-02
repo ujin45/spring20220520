@@ -60,7 +60,7 @@ public class MemberService {
 	}
 
 	public boolean hasMemberNickName(String nickName) {
-		return mapper.countMemberNickName(nickName);
+		return mapper.countMemberNickName(nickName) > 0;
 	}
 
 	public List<MemberDto> listMember() {
@@ -115,6 +115,13 @@ public class MemberService {
 		}
 		
 		return false;
+	}
+
+	public void initPassword(String id) {
+		
+		String pw = passwordEncoder.encode(id);
+				
+		mapper.updatePasswordById(id,pw);
 	}
 
 }
