@@ -1,10 +1,10 @@
 package com.choong.spr.controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,7 +44,8 @@ public class BoardController {
 	}
 
 	@PostMapping("insert")
-	public String insert(BoardDto board, MultipartFile file,
+	public String insert(BoardDto board, 
+			MultipartFile[] file,
 			Principal principal,
 			RedirectAttributes rttr) {
 
@@ -55,10 +56,18 @@ public class BoardController {
 		System.out.println(principal);
 		System.out.println(principal.getName());*/ //username
 
-		if(file.getSize() > 0) {
+		/*if(file.getSize() > 0) {
 			board.setFileName(file.getOriginalFilename());			
 		}
+		*/
 		
+		if(file != null) {
+			List<String> fileList = new ArrayList<String>();
+			for (MultipartFile f : file) {
+				fileList.add(f.getOriginalFilename());
+			}
+			board.setFileName(fileList);
+		}
 		board.setMemberId(principal.getName());
 		boolean success = service.insertBoard(board,file);
 

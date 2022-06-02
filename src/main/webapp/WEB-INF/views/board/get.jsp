@@ -303,6 +303,12 @@
 						<textarea class="form-control" name="body" id="textarea1"
 							cols="30" rows="10" readonly>${board.body }</textarea>
 					</div>
+					
+					<c:forEach items="${board.fileName }" var="file">
+						<div>
+							<img src="${imgUrl }/board/${board.id}/${file}" alt="" />
+						</div>
+					</c:forEach>
 
 					<div>
 						<label for="input3" class="form-label">작성자</label>

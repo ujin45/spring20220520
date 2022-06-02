@@ -33,8 +33,11 @@ public class AppListener implements ServletContextListener {
          ServletContext application = sce.getServletContext();
          
          application.setAttribute("appRoot", application.getContextPath());
+         
+         /* 복붙 주의 , 경로각자 다름, aws3 파일 경로 */
+         String imageUrl = "";
+         application.setAttribute("imageUrl", imageUrl);
     }
-	
 }
 
 
