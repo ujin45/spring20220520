@@ -18,5 +18,9 @@ public interface BoardMapper {
 
 	int deleteBoard(int id);
 
+	List<BoardDto> listByMemberId(String memberId);
+
+	void deleteByMemberId(String memberId);
+
 
 }

@@ -25,11 +25,22 @@ public class BoardService {
 		return mapper.selectBoardAll(type, "%" + keyword + "%");
 	}
 
-	public boolean insertBoard(BoardDto board) {
+	@Transactional
+	public boolean insertBoard(BoardDto board, MultipartFile file) {
 //		board.setInserted(LocalDateTime.now());
-		return mapper.insertBoard(board) == 1;
+		
+		// 게시글 등록
+		int cnt = mapper.insertBoard(board);
+		
+		// 파일 등록 
+		if (file.getSize() > 0) {
+			mapper.insertFile(board.getId(), file.getOriginalFilename());
+//			saveFile(board.getId(), file); // 파일 시스템에 저장
+			saveFileAwsS3(board.getId(), file); // s3에 업로드
+		}
+		
+		return cnt == 1; 
 	}
-
 	public BoardDto getBoardById(int id) {
 		// TODO Auto-generated method stub
 		return mapper.selectBoardById(id);
