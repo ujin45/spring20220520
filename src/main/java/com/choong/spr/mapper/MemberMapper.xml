@@ -1,54 +1,52 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.choong.spr.mapper.MemberMapper">
 
-
-	<insert id="insertMember" >
+	<insert id="insertMember">
 		INSERT INTO Member (id, password, email, nickName)
 		VALUES (#{id}, #{password}, #{email}, #{nickName})
+	
 	</insert>
-
-
+	
 	<select id="countMemberId" resultType="int">
 		SELECT COUNT(id) 
-		FROM Member
+		FROM Member 
 		WHERE id = #{id}
 	</select>
 	
 	<select id="countMemberEmail" resultType="int">
-		SELECT COUNT(email) 
+		SELECT COUNT(email)
 		FROM Member
 		WHERE email = #{email}
 	</select>
 	
-	<select id="countMemberNickName" resultType="boolean">
-		SELECT COUNT(nickName) 
+	<select id="countMemberNickName" resultType="int">
+		SELECT COUNT(nickName)
 		FROM Member
-		WHERE nickName = #{nickName}
+		WHERE nickName = #{nickName}	
 	</select>
 	
 	<select id="selectAllMember" resultType="com.choong.spr.domain.MemberDto">
-		SELECT  id,
-				password,
-				email,
-				nickName,
-				inserted
-		FROM Member
-		ORDER BY inserted DESC				
+		SELECT id,
+		       password,
+		       email,
+		       nickName,
+		       inserted
+		FROM   Member
+		ORDER BY inserted DESC
 	</select>
 	
 	<select id="selectMemberById" resultType="com.choong.spr.domain.MemberDto">
-		SELECT  id,
-				password,
-				email,
-				nickName,
-				inserted
-		FROM Member
-		WHERE id = #{id}
+		SELECT id,
+		       password,
+		       email,
+		       nickName,
+		       inserted
+		FROM   Member
+		WHERE id = #{id} 
 	</select>
-	
 	
 	<delete id="deleteMemberById">
 		DELETE FROM Member
@@ -60,8 +58,8 @@
 		SET password = #{password},
 		    email = #{email},
 		    nickName = #{nickName}
-		WHERE 
-		    id = #{id}    
+		WHERE
+		    id = #{id}
 	</update>
 	
 	<!-- 권한 추가 -->
@@ -70,13 +68,10 @@
 		VALUES (#{id}, #{auth})
 	</insert>
 	
-	
 	<delete id="deleteAuthById">
 		DELETE FROM Auth
-		WHERE memberId = {#id}
+		WHERE memberId = #{id}
 	</delete>
-	
-	
 	
 	<update id="updatePasswordById">
 		UPDATE Member
@@ -84,17 +79,4 @@
 		WHERE id = #{id}
 	</update>
 </mapper>
-
-
-
-
-
-
-
-
-
-
-
-
-
 

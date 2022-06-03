@@ -8,7 +8,7 @@ import com.choong.spr.domain.BoardDto;
 
 public interface BoardMapper {
 
-	List<BoardDto> selectBoardAll(@Param("type")String type, @Param("keyword")String keyword);
+	List<BoardDto> selectBoardAll(@Param("type") String type, @Param("keyword") String keyword);
 
 	int insertBoard(BoardDto board);
 
@@ -22,7 +22,7 @@ public interface BoardMapper {
 
 	void deleteByMemberId(String memberId);
 
-	void insertFile(@Param("boardId")int boardId,@Param("FileName") String FileName);
+	void insertFile(@Param("boardId") int boardId, @Param("fileName") String fileName);
 
 	String selectFileByBoardId(int id);
 
@@ -30,5 +30,6 @@ public interface BoardMapper {
 
 	List<String> selectFileNameByBoard(int boardId);
 
+	void deleteFileByBoardIdAndFileName(@Param("boardId") int id, @Param("fileName")String fileName);
 
 }

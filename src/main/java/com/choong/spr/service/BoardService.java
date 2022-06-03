@@ -11,15 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.choong.spr.domain.BoardDto;
 import com.choong.spr.mapper.BoardMapper;
 import com.choong.spr.mapper.ReplyMapper;
 
-
-
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
@@ -44,19 +42,18 @@ public class BoardService {
 		// TODO Auto-generated method stub
 		return mapper.selectBoardAll(type, "%" + keyword + "%");
 	}
-
 	
 	@PostConstruct
 	public void init() {
-			Region region = Region.AP_NORTHEAST_2;
-			this.s3 = S3Client.builder().region(region).build();
+		Region region = Region.AP_NORTHEAST_2;
+		this.s3 = S3Client.builder().region(region).build();
 	}
 	
-	@PreDestroy // 에러발생방지위해 
+	@PreDestroy
 	public void destroy() {
 		this.s3.close();
 	}
-	
+
 	@Transactional
 	public boolean insertBoard(BoardDto board, MultipartFile[] files) {
 //		board.setInserted(LocalDateTime.now());
@@ -64,47 +61,47 @@ public class BoardService {
 		// 게시글 등록
 		int cnt = mapper.insertBoard(board);
 		
-		// 파일 등록 여러개 위해 배열로 지정
-		if(files != null) {
-			for(MultipartFile file : files) {
-				if (file.getSize() > 0) {
-					mapper.insertFile(board.getId(), file.getOriginalFilename());
-//			        saveFile(board.getId(), file); // 파일 시스템에 저장
-					saveFileAwsS3(board.getId(), file); // s3에 업로드
-				}
-			}
-		}
+		addFiles(board.getId(), files);
 		
 		return cnt == 1; 
 	}
-	
-	
+
+	private void addFiles(int id, MultipartFile[] files) {
+		// 파일 등록 
+		if (files != null) {
+			for (MultipartFile file : files) {
+				if (file.getSize() > 0) {
+					mapper.insertFile(id, file.getOriginalFilename());
+					saveFileAwsS3(id, file); // s3에 업로드
+				}
+			}
+		}
+	}
+
 	private void saveFileAwsS3(int id, MultipartFile file) {
 		String key = "board/" + id + "/" + file.getOriginalFilename();
 		
 		PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-				         .acl(ObjectCannedACL.PUBLIC_READ)
-				         .bucket(bucketName)
-				         .key(key)
-				         .build();
+				.acl(ObjectCannedACL.PUBLIC_READ)
+				.bucket(bucketName)
+				.key(key)
+				.build();
 		
 		RequestBody requestBody;
-
 		try {
 			requestBody = RequestBody.fromInputStream(file.getInputStream(), file.getSize());
 			s3.putObject(putObjectRequest, requestBody);
-			
-		} catch (Exception e) {
-				e.printStackTrace();
-				throw new RuntimeException();
-		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-
+		
+		
 	}
-	
-	
+
 	private void saveFile(int id, MultipartFile file) {
-		// 디렉토리 만들기
+		// 디렉토리 만들기		
 		String pathStr = "C:/imgtmp/board/" + id + "/";
 		File path = new File(pathStr);
 		path.mkdirs();
@@ -121,8 +118,7 @@ public class BoardService {
 		}
 		
 	}
-	
-	
+
 	public BoardDto getBoardById(int id) {
 		BoardDto board = mapper.selectBoardById(id);
 		List<String> fileNames = mapper.selectFileNameByBoard(id);
@@ -132,45 +128,61 @@ public class BoardService {
 		return board;
 	}
 
-	public boolean updateBoard(BoardDto dto) {
-		// TODO Auto-generated method stub
-		return mapper.updateBoard(dto) == 1;
+	@Transactional
+	public boolean updateBoard(BoardDto dto, List<String> removeFileList, MultipartFile[] addFileList) {
+		System.out.println(removeFileList);
+		if(removeFileList != null) {
+			for(String fileName : removeFileList) {
+				System.out.println(dto.getId());
+				System.out.println(fileName);
+				deleteFromAwsS3(dto.getId(), fileName);
+				mapper.deleteFileByBoardIdAndFileName(dto.getId(), fileName);
+			}
+		}
+		
+		if (addFileList != null ) {
+			// file table에 추가된 파일  insert
+			// s3 upload
+			addFiles(dto.getId(), addFileList);
+		}
+		// Board table update
+		
+		int cnt = mapper.updateBoard(dto);
+		return  cnt == 1;
 	}
 
 	@Transactional
 	public boolean deleteBoard(int id) {
 		// 파일 목록 읽기
-		String fileName = mapper.selectFileByBoardId(id);
+		List<String> fileList = mapper.selectFileNameByBoard(id);
 		
-		// s3에서 지우기
-		deleteFromAwsS3(id, fileName);
+		removeFiles(id, fileList);
 		
-		// 파일 테이블 삭제
-		mapper.deleteFileByBoardId(id);
-		
-		// 댓글 테이블 삭제
+		// 댓글테이블 삭제
 		replyMapper.deleteByBoardId(id);
 		
 		return mapper.deleteBoard(id) == 1;
-		
 	}
+
+	private void removeFiles(int id, List<String> fileList) {
+		// s3에서 지우기
+		for (String fileName : fileList) {
+			deleteFromAwsS3(id, fileName);
+		}
 		
+		// 파일테이블 삭제
+		mapper.deleteFileByBoardId(id);
+	}
+
 	private void deleteFromAwsS3(int id, String fileName) {
-		
-		String key = "board/" +  id + "/" + fileName;
+		String key = "board/" + id + "/" + fileName;
 		
 		DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-				           .bucket(bucketName)
-				           .key(key)
-				           .build();
+				.bucket(bucketName)
+				.key(key)
+				.build();
 		
-		
-		s3.deleteObject(deleteObjectRequest);	
+		s3.deleteObject(deleteObjectRequest);
 	}
 
 }
-
-
-
-
-
