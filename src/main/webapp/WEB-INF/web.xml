@@ -17,7 +17,7 @@
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 	<listener>
-		<listener-class>com.choong.spr.listener.AppListener</listener-class>
+		<listener-class>com.team1.travel.listener.AppListener</listener-class>
 	</listener>
 
 	<!-- Processes application requests -->
